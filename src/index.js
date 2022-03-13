@@ -10,19 +10,52 @@ app.use(cors());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+    const {username} = request.headers;
+    const user = users.find((user) => user.username === username);
+    if (!user) {
+       return response.status(404).json({error: "User not found!"});     
+    }
+ 
+    request.user = user;
+    return next();
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+    const { user } = request;
+    const qttyTodos = user.todos.length
+
+    if (user.plan === "PRO" || qttyTodos < 10  ) {
+        return next();
+    }else{
+        return response.status(400).json({error: "To enter more todos, migrate to the PRO plan"})
+    }
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+    const {user} = request;
+    const {id} = request.query;
+    const todo = user.todos.find(
+        (todo) => id === todo.id 
+    )
+
+    if(todo) {
+        request.todo = todo
+        return next()
+    }else{
+        return response.status(400).json({"error": "id not found for user" })
+        
+    }
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+    const {id} = request.query;
+    const user = users.find((user) => user.id === id);
+    if (!id) {
+       return response.status(404).json({error: "User ID not found!"});     
+    }
+ 
+    request.user = user;
+    return next();
 }
 
 app.post('/users', (request, response) => {
